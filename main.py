@@ -22,11 +22,13 @@ class Settings:
         self.fov = fov
 
 class Inputs:
-    def on_press(self, key = keyboard.Key.f6, pos_x: float = 100, pos_y: float = 100):
+    def on_press(self, key = keyboard.Key.f6, pos_x: int = pyautogui.size()[0]/10, pos_y: int = pyautogui.size()[1]/10):
         try:
             if key == keyboard.Key.f6:
                 print('F6 key was pressed')
+                print(f'Before move {pyautogui.position()}')
                 Mouse_movement.move_mouse(pos_x, pos_y)
+                print(f'After move {pyautogui.position()}')
         except AttributeError:
             pass
 
@@ -37,8 +39,8 @@ class Mouse_movement:
     def pixels_per_degree(self, mouse_dpi: int = 4000, system_sensitivity: float = 1.0, in_game_sensitivity: float = 1.0, resolution: tuple[int, int] = [1920, 1080], fov: float = 90.0) -> float:
         return round(resolution[1] / 2) / math.degrees(math.tan(fov/2))
 
-    def move_mouse(self, pos_x: float = 0, pos_y: float = 0):
-        pyautogui.moveRel(pos_x, pos_y)
+    def move_mouse(pos_x: int = 0, pos_y: int = 0):
+        pyautogui.moveRel(pos_x, pos_y, 2)
 
 def run():
     # First we create settings class in order to save all the necessary info
