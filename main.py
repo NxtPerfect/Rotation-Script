@@ -1,8 +1,10 @@
 import pyautogui # pyautogui.move() to move the mouse to new position
 from pynput import keyboard # Create Listener object with pynput.keyboard
-import PyQt5
-import decimal, math
+import tkinter as tk # GUI
+from tkinter import ttk # GUI widgets
+import decimal, math # Floating point accuracy
 
+# Class used to change main settings of the program, GUI interacts with it by scrollbars and input fields
 class Settings:
     mouse_dpi = 1000
     in_game_sensitivity = decimal.Decimal('1.0')
@@ -32,9 +34,30 @@ class Inputs:
         except AttributeError:
             pass
 
+# Slider for fov
+# Slider for in-game sensitivity
+# Slider for duration of rotation
+# Button for keybind
+# Class used to show GUI part of the program, edit fov, sensitivity, duration and change the keybind
 class Gui:
-    pass
+    window = tk.Tk()
+    script_label = ttk.Label(master = window, text = 'Rotation Script', font = 'Ubuntu 18')
 
+    fov_label = ttk.Label()
+    sensitivity_label = ttk.Label()
+    duration_label = ttk.Label()
+    keybind_label = ttk.Label()
+
+    fov_scrollbar = ttk.Scrollbar()
+    duration_scrollbar = ttk.Scrollbar()
+    
+    def __init__(self, pos_x: int=0, pos_y: int=0):
+        self.window.title('xxx')
+        self.window.geometry('200x150')
+        # label
+        self.script_label.pack()
+
+# Class that is used to move the mouse as well as calculate how many pixels we want to turn the mouse for
 class Mouse_movement:
     def pixels_per_degree(self, mouse_dpi: int = 4000, system_sensitivity: float = 1.0, in_game_sensitivity: float = 1.0, resolution: tuple[int, int] = [1920, 1080], fov: float = 90.0) -> float:
         return round(resolution[1] / 2) / math.degrees(math.tan(fov/2))
@@ -55,12 +78,15 @@ def run():
     input = Inputs()
 
     # Create listener that will run input.on_press function whenever a key is pressed
-    listener = keyboard.Listener(on_press=input.on_press)
-    listener.start()
-    listener.join()
+    #listener = keyboard.Listener(on_press=input.on_press)
+    #listener.start()
+    #listener.join()
 
-    while 1:
-        input.on_press(keyboard.Key.f6)
+    gui = Gui()
+    gui.window.mainloop()
+
+    #while 1:
+    #    input.on_press(keyboard.Key.f6)
 
 if __name__ == "__main__":
     run()
