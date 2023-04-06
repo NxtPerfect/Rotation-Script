@@ -12,6 +12,7 @@ class Settings:
     resolution = (1920, 1080)
     degrees_to_rotate = 360
     fov = 90.0
+    duration = decimal.Decimal('1.0')
     keybind = keyboard.Key.f6 
 
     def __init__(self, mouse_dpi: int = 1000, in_game_sensitivity: float = 1.0, system_sensitivity: float = 1.0, resolution: tuple[int, int] = [1920, 1080], degrees_to_rotate: int = 360, fov: float = 90.0):
@@ -43,19 +44,30 @@ class Gui:
     window = tk.Tk()
     script_label = ttk.Label(master = window, text = 'Rotation Script', font = 'Ubuntu 18')
 
-    fov_label = ttk.Label()
-    sensitivity_label = ttk.Label()
-    duration_label = ttk.Label()
-    keybind_label = ttk.Label()
+    fov_label = ttk.Label(master = window, text = f'FOV: {Settings.fov}')
+    sensitivity_label = ttk.Label(master = window, text = f'Sensitivtiy: {Settings.in_game_sensitivity}')
+    duration_label = ttk.Label(master = window, text = f'Duration time: {Settings.duration}')
+    keybind_label = ttk.Label(master = window, text = f'Keybind: {Settings.keybind}')
 
-    fov_scrollbar = ttk.Scrollbar()
+    fov_scale = ttk.Scale(master = window, orient = 'horizontal', from_ = 10.0, to = 180.0, value = Settings.fov) 
+    sensitivity_scrollbar = ttk.Scrollbar()
     duration_scrollbar = ttk.Scrollbar()
-    
+    keybind_button = ttk.Button()
+
+
     def __init__(self, pos_x: int=0, pos_y: int=0):
         self.window.title('xxx')
         self.window.geometry('200x150')
+
+        self.fov_scale.grid(row = 1, column = 0)
+
+        # Draw labels onto the grid
+        self.fov_label.grid(row = 1, column = 1)
+        self.sensitivity_label.grid(row = 2, column = 1)
+        self.duration_label.grid(row = 3, column = 1)
+        self.keybind_label.grid(row = 4, column = 1)
         # label
-        self.script_label.pack()
+        #self.script_label.pack()
 
 # Class that is used to move the mouse as well as calculate how many pixels we want to turn the mouse for
 class Mouse_movement:
