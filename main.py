@@ -27,8 +27,8 @@ class Settings:
 class Inputs:
     def on_press(self, key = keyboard.Key.f6, pos_x: int = pyautogui.size()[0]/10, pos_y: int = pyautogui.size()[1]/10):
         try:
-            if key == keyboard.Key.f6:
-                print('F6 key was pressed')
+            if key == keybind:
+                print(f'{Settings.keybind.name} key was pressed')
                 print(f'Before move {pyautogui.position()}')
                 Mouse_movement.move_mouse(pos_x, pos_y)
                 print(f'After move {pyautogui.position()}')
@@ -42,32 +42,70 @@ class Inputs:
 # Class used to show GUI part of the program, edit fov, sensitivity, duration and change the keybind
 class Gui:
     window = tk.Tk()
-    script_label = ttk.Label(master = window, text = 'Rotation Script', font = 'Ubuntu 18')
-
-    fov_label = ttk.Label(master = window, text = f'FOV: {Settings.fov}')
-    sensitivity_label = ttk.Label(master = window, text = f'Sensitivtiy: {Settings.in_game_sensitivity}')
-    duration_label = ttk.Label(master = window, text = f'Duration time: {Settings.duration}')
-    keybind_label = ttk.Label(master = window, text = f'Keybind: {Settings.keybind}')
-
-    fov_scale = ttk.Scale(master = window, orient = 'horizontal', from_ = 10.0, to = 180.0, value = Settings.fov) 
-    sensitivity_scrollbar = ttk.Scrollbar()
-    duration_scrollbar = ttk.Scrollbar()
-    keybind_button = ttk.Button()
-
 
     def __init__(self, pos_x: int=0, pos_y: int=0):
-        self.window.title('xxx')
-        self.window.geometry('200x150')
+        self.script_label = ttk.Label(master = self.window, text = 'Rotation Script', font = 'Ubuntu 18')
+        self.fov_label = ttk.Label(master = self.window, text = f'FOV: {Settings.fov}')
+        self.sensitivity_label = ttk.Label(master = self.window, text = f'Sensitivtiy: {Settings.in_game_sensitivity}')
+        self.duration_label = ttk.Label(master = self.window, text = f'Duration time: {Settings.duration}')
+        self.keybind_label = ttk.Label(master = self.window, text = f'Keybind: {Settings.keybind}')
+        self.script_label = ttk.Label(master = self.window, text = 'Rotation Script', font = 'Ubuntu 18')
 
-        self.fov_scale.grid(row = 1, column = 0)
+        self.fov_label = ttk.Label(master = self.window, text = f'FOV: {Settings.fov}')
+        self.sensitivity_label = ttk.Label(master = self.window, text = f'Sensitivtiy: {Settings.in_game_sensitivity}')
+        self.duration_label = ttk.Label(master = self.window, text = f'Duration time: {Settings.duration}')
+        self.keybind_label = ttk.Label(master = self.window, text = f'Keybind: {Settings.keybind}')
+
+        self.window.title('xxx')
+        #self.window.geometry('200x150')
+
+        self.fov_spinbox = ttk.Spinbox(master = self.window, from_ = decimal.Decimal('10.0'), to = decimal.Decimal('180.0'), increment = 0.1, command = self.update_fov, validatecommand = (self.window.register(self.float_validate)))
+        self.sensitivity_spinbox = ttk.Spinbox(master = self.window, from_ = decimal.Decimal('0.01'), to = decimal.Decimal('10.0'), increment = 0.01, command = self.update_sensitivity, validate = 'all', validatecommand = (self.window.register(self.float_validate)))
+        self.duration_spinbox = ttk.Spinbox(master = self.window, from_ = decimal.Decimal('0.1'), to = decimal.Decimal('60.0'), increment = 0.1 , command = self.update_duration, validate = 'all', validatecommand = (self.window.register(self.float_validate)))
+        self.keybind_button = ttk.Button(master = self.window, text = 'Change keybind', command = self.change_keybind) # TODO: Needs to listen to keybind after that instead of trying to immediately change it
+
+        self.script_label.grid(row = 0, column = 0, columnspan = 2)
+
+        self.fov_spinbox.grid(row = 1, column = 0)
+        self.sensitivity_spinbox.grid(row = 2, column = 0)
+        self.duration_spinbox.grid(row = 3, column = 0)
+        self.keybind_button.grid(row = 4, column = 0)
 
         # Draw labels onto the grid
         self.fov_label.grid(row = 1, column = 1)
         self.sensitivity_label.grid(row = 2, column = 1)
         self.duration_label.grid(row = 3, column = 1)
         self.keybind_label.grid(row = 4, column = 1)
-        # label
-        #self.script_label.pack()
+
+    def update_fov(self):
+        Settings.fov = decimal.Decimal(self.fov_spinbox.get())
+        self.fov_label['text'] = f'FOV: {Settings.fov}'
+
+    def update_sensitivity(self):
+        Settings.in_game_sensitivity = decimal.Decimal(self.sensitivity_spinbox.get())
+        self.sensitivity_label['text'] = f'Sensitivity: {Settings.in_game_sensitivity}'
+
+    def update_duration(self):
+        Settings.duration = decimal.Decimal(self.duration_spinbox.get())
+        self.duration_label['text'] = f'Duration time: {Settings.duration}s'
+
+    # If shift, control or alt is pressed, read the next input and add that to the keybind
+    def change_keybind(self, key):
+        try:
+            Settings.keybind = key.char
+        except AttributeError:
+            Settings.keybind = key.name
+
+    def float_validate(action, index, value_if_allowed, prior_value, text, validation_type, trigger_type, widget_name):
+        if text in '0123456789.-+':
+            try:
+                float(value_if_allowed)
+                return True
+            except ValueError:
+                return False
+        else:
+            return False
+
 
 # Class that is used to move the mouse as well as calculate how many pixels we want to turn the mouse for
 class Mouse_movement:
