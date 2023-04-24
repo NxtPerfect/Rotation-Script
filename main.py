@@ -3,34 +3,43 @@ from pynput import keyboard # Create Listener object with pynput.keyboard
 import tkinter as tk # GUI
 from tkinter import ttk # GUI widgets
 import decimal, math # Floating point accuracy
+from typing import List
 
 # Class used to change main settings of the program, GUI interacts with it by scrollbars and input fields
 class Settings:
     mouse_dpi = 1000
-    in_game_sensitivity = decimal.Decimal('1.0')
-    system_sensitivity = decimal.Decimal('1.0')
-    resolution = (1920, 1080)
-    degrees_to_rotate = 360
+    in_game_sensitivity = 1.0
+    system_sensitivity = 1.0
+    resolution = [1920, 1080]
+    degrees_to_rotate = 180
     fov = 90.0
-    duration = decimal.Decimal('1.0')
+    duration = 1.0
     keybind = keyboard.Key.f6 
 
-    def __init__(self, mouse_dpi: int = 1000, in_game_sensitivity: float = 1.0, system_sensitivity: float = 1.0, resolution: tuple[int, int] = [1920, 1080], degrees_to_rotate: int = 360, fov: float = 90.0):
-        decimal.getcontext().prec = 6
+    def __init__(self, mouse_dpi: int = 1000, in_game_sensitivity: float = 1.0, system_sensitivity: float = 1.0, resolution: List[int] = [1920, 1080], degrees_to_rotate: int = 360, fov: float = 90.0):
         self.mouse_dpi = mouse_dpi
-        self.in_game_sensitivity = decimal.Decimal(in_game_sensitivity)
-        self.system_sensitivity = decimal.Decimal(system_sensitivity)
+        self.in_game_sensitivity = in_game_sensitivity
+        self.system_sensitivity = system_sensitivity
         self.resolution = resolution
         self.degrees_to_rotate = degrees_to_rotate
         self.fov = fov
 
+# Class that is used to move the mouse as well as calculate how many pixels we want to turn the mouse for
+class Mouse_movement:
+    def pixels_per_degree(self, mouse_dpi: float = 4000, system_sensitivity: float = 1.0, in_game_sensitivity: float = 1.0, resolution: List[int] = [1920, 1080], fov: float = 90.0):
+        return round(round(resolution[1] / 2.0) / math.degrees(math.tan(fov/2.0)))
+
+    def move_mouse(self, pos_x: int = 0, pos_y: int = 0):
+        pyautogui.moveRel(pos_x, pos_y, 2)
+
 class Inputs:
-    def on_press(self, key = keyboard.Key.f6, pos_x: int = pyautogui.size()[0]/10, pos_y: int = pyautogui.size()[1]/10):
+    def on_press(self, key = keyboard.Key.f6, pos_x: int = Mouse_movement.pixels_per_degree(Mouse_movement, Settings.mouse_dpi, Settings.system_sensitivity, Settings.in_game_sensitivity, Settings.resolution, Settings.fov), pos_y: int = 0):
         try:
-            if key == keybind:
+            if key == Settings.keybind:
                 print(f'{Settings.keybind.name} key was pressed')
                 print(f'Before move {pyautogui.position()}')
-                Mouse_movement.move_mouse(pos_x, pos_y)
+                print(f'{Mouse_movement.pixels_per_degree(Mouse_movement, Settings.mouse_dpi, Settings.system_sensitivity, Settings.in_game_sensitivity, Settings.resolution, Settings.fov)}')
+                Mouse_movement.move_mouse(pos_x*Settings.degrees_to_rotate, pos_y)
                 print(f'After move {pyautogui.position()}')
         except AttributeError:
             pass
@@ -42,6 +51,7 @@ class Inputs:
 # Class used to show GUI part of the program, edit fov, sensitivity, duration and change the keybind
 class Gui:
     window = tk.Tk()
+    key_pressed = None
 
     def __init__(self, pos_x: int=0, pos_y: int=0):
         self.script_label = ttk.Label(master = self.window, text = 'Rotation Script', font = 'Ubuntu 18')
@@ -90,11 +100,15 @@ class Gui:
         self.duration_label['text'] = f'Duration time: {Settings.duration}s'
 
     # If shift, control or alt is pressed, read the next input and add that to the keybind
-    def change_keybind(self, key):
-        try:
-            Settings.keybind = key.char
-        except AttributeError:
-            Settings.keybind = key.name
+    def change_keybind(self):
+        global key_pressed
+
+        def on_key_press(self, event):
+            global key_pressed
+            Settings.keybind = event.keysym
+            root.unbind('<KeyPress>')
+        
+        root.bind('<KeyPress>', on_key_press)
 
     def float_validate(action, index, value_if_allowed, prior_value, text, validation_type, trigger_type, widget_name):
         if text in '0123456789.-+':
@@ -106,14 +120,6 @@ class Gui:
         else:
             return False
 
-
-# Class that is used to move the mouse as well as calculate how many pixels we want to turn the mouse for
-class Mouse_movement:
-    def pixels_per_degree(self, mouse_dpi: int = 4000, system_sensitivity: float = 1.0, in_game_sensitivity: float = 1.0, resolution: tuple[int, int] = [1920, 1080], fov: float = 90.0) -> float:
-        return round(resolution[1] / 2) / math.degrees(math.tan(fov/2))
-
-    def move_mouse(pos_x: int = 0, pos_y: int = 0):
-        pyautogui.moveRel(pos_x, pos_y, 2)
 
 def run():
     # First we create settings class in order to save all the necessary info
@@ -128,12 +134,16 @@ def run():
     input = Inputs()
 
     # Create listener that will run input.on_press function whenever a key is pressed
-    #listener = keyboard.Listener(on_press=input.on_press)
-    #listener.start()
-    #listener.join()
+    listener = keyboard.Listener(on_press=input.on_press)
+    listener.start()
+    listener.wait() # Wait for tkinter
 
+    # Initialize gui
     gui = Gui()
     gui.window.mainloop()
+
+    # Stop listening
+    listener.stop()
 
     #while 1:
     #    input.on_press(keyboard.Key.f6)
