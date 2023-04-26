@@ -29,7 +29,7 @@ jobs:
         pip install -r requirements.txt
 
     - name: Build executable
-      uses: PyO3/maturin-action@v1.0.3
+      uses: PyO3/maturin-action@v1
       with:
         manylinux: true
         macos: true
@@ -40,7 +40,7 @@ jobs:
 
     - name: Create Release
       id: create_release
-      uses: actions/create-release@v1.0.6
+      uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
@@ -50,7 +50,7 @@ jobs:
         prerelease: false
 
     - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1.0.2
+      uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
