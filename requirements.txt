@@ -11,3 +11,4 @@ python-xlib==0.33
 python3-xlib==0.15
 pytweening==1.0.4
 six==1.16.0
+pyinstaller==5.x
