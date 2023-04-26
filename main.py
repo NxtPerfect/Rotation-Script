@@ -51,7 +51,6 @@ class Inputs:
 # Class used to show GUI part of the program, edit fov, sensitivity, duration and change the keybind
 class Gui:
     window = tk.Tk()
-    key_pressed = None
 
     def __init__(self, pos_x: int=0, pos_y: int=0):
         self.script_label = ttk.Label(master = self.window, text = 'Rotation Script', font = 'Ubuntu 18')
@@ -101,14 +100,16 @@ class Gui:
 
     # If shift, control or alt is pressed, read the next input and add that to the keybind
     def change_keybind(self):
-        global key_pressed
+        self.keybind_button.config(text = 'Press a key...')
 
-        def on_key_press(self, event):
-            global key_pressed
-            Settings.keybind = event.keysym
-            root.unbind('<KeyPress>')
+        def on_key_release(key):
+            self.keybind_button.config(text = 'Change keybind')
+            Settings.keybind = key
+            self.keybind_label.config(text = f'Keybind: {Settings.keybind}')
+            listener.stop()
         
-        root.bind('<KeyPress>', on_key_press)
+        listener = keyboard.Listener(on_release=on_key_release)
+        listener.start()
 
     def float_validate(action, index, value_if_allowed, prior_value, text, validation_type, trigger_type, widget_name):
         if text in '0123456789.-+':
