@@ -33,6 +33,8 @@ jobs:
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: false
+        automatic_release_tag: latest
+        title: Release ${{ github.release_number }}
         files:
           LICENSE.txt
           *.py
