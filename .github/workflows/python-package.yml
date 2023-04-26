@@ -31,7 +31,6 @@ jobs:
     - name: Build executable
       uses: PyO3/maturin-action@v1
       with:
-        manylinux: true
         macos: true
         windows: true
         release: true
