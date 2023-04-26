@@ -28,26 +28,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Build executable
-      uses: PyO3/maturin-action@v1
-      with:
-        macos: true
-        windows: true
-        release: true
-        interpreter: "python${{ matrix.python-version }}"
-        artifact-name: "rotation-script-${{ matrix.os }}-${{ matrix.python-version }}"
-
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        draft: false
-        prerelease: false
-
     - name: Upload Release Asset
       uses: marvinpinto/action-automatic-releases@latest
       with:
