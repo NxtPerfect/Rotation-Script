@@ -1,0 +1,43 @@
+name: Build Executables
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - windows-latest
+          - macos-latest
+          - ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v1
+      
+    - name: Install Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: '3.x'
+        architecture: 'x64'
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: 16
+
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+
+    - name: Build Executable
+      run: pyinstaller --onefile main.py
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: myscript-${{ matrix.os }}
+        path: dist/rotation-script
